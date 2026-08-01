@@ -30,6 +30,7 @@ const PROVIDER_HIDE_GET_STARTED_SETTING = 'hideGetStarted';
 
 import { EncounterChartPage } from './pages/encounter/EncounterChartPage';
 import { EncounterModal } from './pages/encounter/EncounterModal';
+import { LacunaPanel } from './pages/lacuna/LacunaPanel';
 import { FaxPage } from './pages/fax/FaxPage';
 import { GetStartedPage } from './pages/getstarted/GetStartedPage';
 import { DoseSpotFavoritesPage } from './pages/integrations/DoseSpotFavoritesPage';
@@ -206,6 +207,9 @@ export function App(): JSX.Element | null {
                 <Route path="Encounter/new" element={<EncounterModal />} />
                 <Route path="Encounter/:encounterId" element={<EncounterChartPage />}>
                   <Route path="Task/:taskId" element={<TaskDetailsModal />} />
+                  {/* Lacuna additive panel — renders below the shell's
+                      EncounterChart via the existing <Outlet /> slot. */}
+                  <Route path="lacuna" element={<LacunaPanel />} />
                 </Route>
                 <Route path="edit" element={<EditTab />} />
                 <Route path="Communication" element={<CommunicationTab />} />

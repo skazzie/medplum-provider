@@ -1,0 +1,180 @@
+/*
+ * Lacuna scoped tokens + layout. All rules live under `.lacuna-root` so
+ * nothing here can collide with Mantine or the fork's global styles.
+ * Colours mirror the original intake-AI UI reference.
+ */
+.lacuna-root {
+  --ll-s0: #fdfcfa;
+  --ll-s1: #f4f3ef;
+  --ll-s2: #ffffff;
+  --ll-t1: #1a1a18;
+  --ll-t2: #575652;
+  --ll-t3: #8a8882;
+  --ll-bd: rgba(26, 26, 24, 0.09);
+  --ll-bd2: rgba(26, 26, 24, 0.16);
+  --ll-dg-bg: #fbe8e6;
+  --ll-dg-fg: #a02b26;
+  --ll-dg-ln: #dd4a44;
+  --ll-wn-bg: #f9ecd6;
+  --ll-wn-fg: #7f4a08;
+  --ll-wn-ln: #b87113;
+  --ll-ac-bg: #e4f0fb;
+  --ll-ac-fg: #155c9f;
+  --ll-ac-ln: #3187da;
+  --ll-serif: ui-serif, Georgia, "Times New Roman", serif;
+  --ll-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --ll-mono: ui-monospace, monospace;
+
+  background: var(--ll-s0);
+  color: var(--ll-t1);
+  font: 400 15px/1.5 var(--ll-sans);
+  padding: 20px 24px;
+  border-top: 1px solid var(--ll-bd);
+  margin-top: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lacuna-root {
+    --ll-s0: #161614;
+    --ll-s1: #1e1e1c;
+    --ll-s2: #242422;
+    --ll-t1: #f2f1ee;
+    --ll-t2: #a8a6a0;
+    --ll-t3: #74726c;
+    --ll-bd: rgba(242, 241, 238, 0.10);
+    --ll-bd2: rgba(242, 241, 238, 0.19);
+    --ll-dg-bg: #412020;
+    --ll-dg-fg: #f7aaa8;
+    --ll-wn-bg: #40311a;
+    --ll-wn-fg: #f2c67f;
+    --ll-ac-bg: #152e48;
+    --ll-ac-fg: #96c2ef;
+  }
+}
+
+.lacuna-root .lacuna-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  border-bottom: 1px solid var(--ll-bd);
+  padding-bottom: 10px; margin-bottom: 18px;
+}
+.lacuna-root .lacuna-brand {
+  font-size: 14px; font-weight: 500; letter-spacing: -0.01em;
+}
+.lacuna-root .lacuna-medplum-link {
+  font: 11.5px/1 var(--ll-mono);
+  color: var(--ll-ac-fg); text-decoration: none;
+  padding: 3px 7px; border: 1px solid var(--ll-ac-ln); border-radius: 4px;
+}
+.lacuna-root .lacuna-medplum-link:hover { background: var(--ll-ac-bg); }
+
+.lacuna-root .lacuna-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+  gap: 32px;
+}
+.lacuna-root .lacuna-main { min-width: 0; }
+.lacuna-root .lacuna-side {
+  border-left: 1px solid var(--ll-bd);
+  padding-left: 24px;
+  max-height: 70vh; overflow-y: auto;
+}
+
+.lacuna-root .lacuna-cap {
+  font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ll-t3); margin-bottom: 11px;
+}
+
+/* --- The note prose (hero) --- */
+.lacuna-root .lacuna-hpi {
+  font-family: var(--ll-serif);
+  font-size: 18px; line-height: 1.8; letter-spacing: -0.006em;
+  max-width: 64ch;
+  margin: 0 0 26px;
+}
+.lacuna-root .lacuna-para-secondary {
+  font-family: var(--ll-sans);
+  font-size: 13.5px; line-height: 1.7;
+  max-width: 64ch;
+  color: var(--ll-t2);
+  margin: 0 0 18px;
+}
+.lacuna-root .lacuna-para-caption {
+  display: block;
+  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ll-t3); margin-bottom: 3px;
+}
+
+/* --- Three clause signals --- */
+.lacuna-root .lacuna-tr {
+  border-bottom: 1px dotted var(--ll-bd2);
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 100ms;
+}
+.lacuna-root .lacuna-tr:hover {
+  background: var(--ll-s1);
+  border-bottom-color: var(--ll-t3);
+}
+.lacuna-root .lacuna-tr.chart {
+  border-bottom: 1px solid var(--ll-ac-ln);
+  cursor: help;
+}
+.lacuna-root .lacuna-tr.chart sup {
+  color: var(--ll-ac-fg); font-size: 9px; margin-left: 1px;
+}
+.lacuna-root .lacuna-tr.block {
+  background: var(--ll-dg-bg);
+  border-bottom-color: var(--ll-dg-fg);
+  padding: 1px 2px;
+}
+.lacuna-root .lacuna-tr.sel {
+  outline: 1px solid var(--ll-bd2);
+  outline-offset: 2px;
+}
+
+/* --- Transcript panel --- */
+.lacuna-root .lacuna-turn {
+  margin-bottom: 12px; font-size: 13px; line-height: 1.55;
+  color: var(--ll-t3);
+  transition: color 120ms;
+}
+.lacuna-root .lacuna-turn-n {
+  font: 10.5px/1 var(--ll-mono);
+  color: var(--ll-t3);
+  margin-right: 6px;
+}
+.lacuna-root .lacuna-turn-sp {
+  font-size: 10.5px; color: var(--ll-t3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.lacuna-root .lacuna-turn-txt { margin-top: 2px; }
+.lacuna-root .lacuna-turn.pt .lacuna-turn-txt {
+  font-family: var(--ll-serif); font-size: 14px;
+}
+.lacuna-root .lacuna-turn.hot { color: var(--ll-t1); }
+.lacuna-root .lacuna-turn.hot.info {
+  background: var(--ll-ac-bg); border-radius: 6px; padding: 8px 10px;
+  margin: 0 -10px 12px;
+}
+.lacuna-root .lacuna-turn.hot.info * { color: var(--ll-ac-fg) !important; }
+.lacuna-root .lacuna-turn.hot.warning {
+  background: var(--ll-wn-bg); border-radius: 6px; padding: 8px 10px;
+  margin: 0 -10px 12px;
+}
+.lacuna-root .lacuna-turn.hot.warning * { color: var(--ll-wn-fg) !important; }
+.lacuna-root .lacuna-turn.hot.blocking {
+  background: var(--ll-dg-bg); border-radius: 6px; padding: 8px 10px;
+  margin: 0 -10px 12px;
+}
+.lacuna-root .lacuna-turn.hot.blocking * { color: var(--ll-dg-fg) !important; }
+
+.lacuna-root .lacuna-loading,
+.lacuna-root .lacuna-error {
+  padding: 24px; font-size: 14px; color: var(--ll-t2);
+}
+.lacuna-root .lacuna-error { color: var(--ll-dg-fg); }
+
+@media (max-width: 900px) {
+  .lacuna-root .lacuna-cols { grid-template-columns: 1fr; }
+  .lacuna-root .lacuna-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--ll-bd); padding-top: 18px; }
+}
