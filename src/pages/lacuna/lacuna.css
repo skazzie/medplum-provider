@@ -168,6 +168,109 @@
 }
 .lacuna-root .lacuna-turn.hot.blocking * { color: var(--ll-dg-fg) !important; }
 
+.lacuna-root .lacuna-approval {
+  font: 10.5px/1 var(--ll-mono);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 3px; margin-left: 10px;
+  vertical-align: 1px;
+}
+.lacuna-root .lacuna-approval-draft_agent_reviewed {
+  background: var(--ll-s1); color: var(--ll-t3);
+  border: 1px solid var(--ll-bd);
+}
+.lacuna-root .lacuna-approval-awaiting_physician {
+  background: var(--ll-wn-bg); color: var(--ll-wn-fg);
+  border: 1px solid var(--ll-wn-ln);
+}
+.lacuna-root .lacuna-approval-physician_approved {
+  background: #e8f2dc; color: #38690f;
+  border: 1px solid #5e9420;
+}
+
+.lacuna-root .lacuna-band {
+  border-top: 1px solid var(--ll-bd);
+  padding-top: 16px; margin: 22px 0 18px;
+}
+.lacuna-root .lacuna-cap-inline { margin-top: 18px; }
+
+.lacuna-root .lacuna-ann {
+  border-left: 2px solid var(--ll-bd2);
+  padding-left: 13px;
+  margin-bottom: 14px;
+  max-width: 66ch;
+}
+.lacuna-root .lacuna-ann.d { border-left-color: var(--ll-dg-ln); }
+.lacuna-root .lacuna-ann.w { border-left-color: var(--ll-wn-ln); }
+.lacuna-root .lacuna-ann.a { border-left-color: var(--ll-ac-ln); }
+.lacuna-root .lacuna-ann.ctx { border-left-color: var(--ll-bd2); }
+.lacuna-root .lacuna-ann.lead p { font-size: 15.5px; }
+.lacuna-root .lacuna-ann h4 {
+  margin: 0 0 3px;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.03em; text-transform: uppercase;
+}
+.lacuna-root .lacuna-ann.d h4 { color: var(--ll-dg-fg); }
+.lacuna-root .lacuna-ann.w h4 { color: var(--ll-wn-fg); }
+.lacuna-root .lacuna-ann.a h4 { color: var(--ll-ac-fg); }
+.lacuna-root .lacuna-ann.ctx h4 { color: var(--ll-t3); }
+.lacuna-root .lacuna-ann.ctx p { color: var(--ll-t2); }
+.lacuna-root .lacuna-ann p { margin: 0; font-size: 14px; line-height: 1.55; }
+.lacuna-root .lacuna-ann-src {
+  font: 11px/1.3 var(--ll-mono);
+  color: var(--ll-t3);
+  margin-top: 4px;
+}
+.lacuna-root .lacuna-kind-tag {
+  font-size: 9.5px; letter-spacing: 0.08em;
+  color: var(--ll-t3);
+  border: 1px solid var(--ll-bd2); border-radius: 3px;
+  padding: 1px 5px; margin-left: 8px;
+  font-weight: 400; vertical-align: 1px;
+}
+
+.lacuna-root .lacuna-prop {
+  margin-bottom: 12px; max-width: 66ch;
+}
+.lacuna-root .lacuna-prop-head {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px;
+}
+.lacuna-root .lacuna-prop-head strong { font-size: 14.5px; font-weight: 500; }
+.lacuna-root .lacuna-prop-why {
+  font-size: 13.5px; color: var(--ll-t2); margin-top: 2px; line-height: 1.5;
+}
+.lacuna-root .lacuna-prop-driven {
+  font: 11px/1.3 var(--ll-mono);
+  color: var(--ll-t3);
+  margin-top: 3px;
+}
+.lacuna-root .lacuna-chip {
+  font: 10.5px/1 var(--ll-mono);
+  padding: 2px 6px; border-radius: 3px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  background: var(--ll-s1); border: 1px solid var(--ll-bd);
+  color: var(--ll-t3);
+}
+.lacuna-root .lacuna-chip-clear { color: var(--ll-dg-fg); border-color: var(--ll-dg-fg); }
+.lacuna-root .lacuna-chip-consider { color: var(--ll-t2); }
+.lacuna-root .lacuna-chip-cat { color: var(--ll-ac-fg); border-color: var(--ll-ac-ln); }
+.lacuna-root .lacuna-chip-conflict { color: #ea580c; border-color: #ea580c; }
+
+.lacuna-root .lacuna-research summary {
+  cursor: pointer; font-size: 12.5px; color: var(--ll-t2);
+}
+.lacuna-root .lacuna-research-item {
+  font-size: 13px; margin: 8px 0;
+}
+.lacuna-root .lacuna-research-item a {
+  color: var(--ll-ac-fg); text-decoration: none;
+}
+.lacuna-root .lacuna-research-item a:hover { text-decoration: underline; }
+.lacuna-root .lacuna-research-take { color: var(--ll-t2); }
+
+.lacuna-root .lacuna-note-hint {
+  color: var(--ll-t3); font-size: 13px; font-style: italic;
+}
+
 .lacuna-root .lacuna-loading,
 .lacuna-root .lacuna-error {
   padding: 24px; font-size: 14px; color: var(--ll-t2);

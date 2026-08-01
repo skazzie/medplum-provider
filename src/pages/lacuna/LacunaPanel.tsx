@@ -24,6 +24,40 @@ import type { Finding, IntakeNote, ReviewFinding } from './types';
 import './lacuna.css';
 
 type Severity = 'blocking' | 'warning' | 'info';
+type PlanApprovalStatus =
+  | 'draft_agent_reviewed'
+  | 'awaiting_physician'
+  | 'physician_approved';
+
+// Section[1] payload written by MedplumNoteStore.save when extras is passed.
+// Optional throughout — a Composition predating the addendum has no section[1].
+interface CompositionExtras {
+  reviews?: {
+    completeness?: ReviewFinding[];
+    pharmacy?: ReviewFinding[];
+    guidelines?: ReviewFinding[];
+    history?: ReviewFinding[];
+  } | null;
+  conflicts?: Array<{ summary?: string; findings?: unknown[] }>;
+  plan?: {
+    status?: string;
+    items?: Array<{
+      id: string;
+      action: string;
+      category?: string;
+      rationale?: string;
+      drivenBy?: string[];
+      confidence?: 'clear' | 'consider';
+    }>;
+    notAddressed?: string[];
+  } | null;
+  planContradictions?: Array<{ planItemId: string }>;
+  research?: {
+    sources?: Array<{ title: string; url: string; takeaway: string }>;
+    error?: string | null;
+  } | null;
+  planApprovalStatus?: PlanApprovalStatus;
+}
 
 interface ChartLite {
   medications: Array<{
@@ -92,6 +126,7 @@ export function LacunaPanel(): JSX.Element {
   const [note, setNote] = useState<IntakeNote | null>(null);
   const [chart, setChart] = useState<ChartLite | null>(null);
   const [compositionId, setCompositionId] = useState<string | null>(null);
+  const [extras, setExtras] = useState<CompositionExtras | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTurn, setActiveTurn] = useState<number | null>(null);
   const [activeSeverity, setActiveSeverity] = useState<Severity | null>(null);
@@ -117,6 +152,21 @@ export function LacunaPanel(): JSX.Element {
         const parsed = JSON.parse(extractJsonFromDiv(div)) as IntakeNote;
         if (cancelled) return;
         setNote(parsed);
+
+        // section[1] — reviewer output addendum. Optional. A Composition
+        // predating A2 has no section[1]; render note-and-transcript only.
+        const div1 = composition.section?.[1]?.text?.div;
+        if (div1) {
+          try {
+            const parsedExtras = JSON.parse(extractJsonFromDiv(div1)) as CompositionExtras;
+            if (!cancelled) setExtras(parsedExtras);
+          } catch {
+            // A malformed addendum is not fatal — leave extras null and
+            // render the primary view. Not reporting to state error so the
+            // panel keeps working.
+            if (!cancelled) setExtras(null);
+          }
+        }
 
         // 2. Patient (for demographics). The write path stores subject
         // either as `Patient?identifier=...` (conditional reference) or
@@ -218,10 +268,40 @@ export function LacunaPanel(): JSX.Element {
     turnRefs.current[turn]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
+  const allReviews: ReviewFinding[] = extras?.reviews
+    ? [
+        ...(extras.reviews.completeness ?? []),
+        ...(extras.reviews.pharmacy ?? []),
+        ...(extras.reviews.guidelines ?? []),
+        ...(extras.reviews.history ?? []),
+      ]
+    : [];
+  const defects = allReviews.filter((r) => r.kind === 'defect');
+  const context = allReviews.filter((r) => r.kind === 'context');
+  const approval: PlanApprovalStatus = extras?.planApprovalStatus ?? 'draft_agent_reviewed';
+  const conflicts = extras?.conflicts ?? [];
+  const planItems = extras?.plan?.items ?? [];
+  const contradictionIds = new Set(
+    (extras?.planContradictions ?? []).map((c) => c.planItemId),
+  );
+  const severityRank: Record<Severity, number> = { blocking: 0, warning: 1, info: 2 };
+  const sortedDefects = [...defects].sort(
+    (a, b) => severityRank[a.severity] - severityRank[b.severity],
+  );
+
   return (
     <div className="lacuna-root">
       <div className="lacuna-header">
-        <div className="lacuna-brand">Lacuna intake review</div>
+        <div className="lacuna-brand">
+          Lacuna intake review
+          <span className={`lacuna-approval lacuna-approval-${approval}`}>
+            {approval === 'physician_approved'
+              ? 'approved for patient'
+              : approval === 'awaiting_physician'
+                ? 'awaiting physician'
+                : 'draft, agent-reviewed'}
+          </span>
+        </div>
         {compositionId && (
           <a
             className="lacuna-medplum-link"
@@ -243,7 +323,7 @@ export function LacunaPanel(): JSX.Element {
               <ClauseSpan
                 key={j}
                 clause={clause}
-                reviews={[]}
+                reviews={allReviews}
                 onClick={goToTurn}
                 activeTurn={activeTurn}
               />
@@ -256,13 +336,98 @@ export function LacunaPanel(): JSX.Element {
                 <ClauseSpan
                   key={j}
                   clause={clause}
-                  reviews={[]}
+                  reviews={allReviews}
                   onClick={goToTurn}
                   activeTurn={activeTurn}
                 />
               ))}
             </p>
           ))}
+
+          {extras && (
+            <>
+              {(conflicts.length > 0 || defects.length > 0 || context.length > 0) && (
+                <div className="lacuna-band">
+                  <div className="lacuna-cap">Annotations</div>
+                  {conflicts[0] && (
+                    <div className="lacuna-ann d lead">
+                      <h4>Contradiction — unresolved</h4>
+                      <p>{conflicts[0].summary ?? 'Contradiction detected.'}</p>
+                    </div>
+                  )}
+                  {sortedDefects.map((r, i) => (
+                    <Annotation key={`d${i}`} review={r} />
+                  ))}
+                  {context.length > 0 && (
+                    <div className="lacuna-cap lacuna-cap-inline">Context</div>
+                  )}
+                  {context.map((r, i) => (
+                    <Annotation key={`c${i}`} review={r} />
+                  ))}
+                </div>
+              )}
+
+              {planItems.length > 0 && (
+                <div className="lacuna-band">
+                  <div className="lacuna-cap">Proposed — not ordered</div>
+                  {planItems.map((item) => (
+                    <div key={item.id} className="lacuna-prop">
+                      <div className="lacuna-prop-head">
+                        <strong>{item.action}</strong>
+                        {item.confidence && (
+                          <span className={`lacuna-chip lacuna-chip-${item.confidence}`}>
+                            {item.confidence === 'clear' ? 'covered' : 'consider'}
+                          </span>
+                        )}
+                        {item.category && (
+                          <span className="lacuna-chip lacuna-chip-cat">{item.category}</span>
+                        )}
+                        {contradictionIds.has(item.id) && (
+                          <span className="lacuna-chip lacuna-chip-conflict">contradiction</span>
+                        )}
+                      </div>
+                      {item.rationale && (
+                        <div className="lacuna-prop-why">{item.rationale}</div>
+                      )}
+                      {item.drivenBy && item.drivenBy.length > 0 && (
+                        <div className="lacuna-prop-driven">
+                          drivenBy: {item.drivenBy.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {extras.research && extras.research.sources && extras.research.sources.length > 0 && (
+                <div className="lacuna-band">
+                  <div className="lacuna-cap">
+                    Research · {extras.research.sources.length} sources
+                  </div>
+                  <details className="lacuna-research">
+                    <summary>Show sources</summary>
+                    {extras.research.sources.map((s, i) => (
+                      <div key={i} className="lacuna-research-item">
+                        <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a>
+                        <div className="lacuna-research-take">{s.takeaway}</div>
+                      </div>
+                    ))}
+                  </details>
+                </div>
+              )}
+            </>
+          )}
+          {!extras && (
+            <div className="lacuna-band lacuna-note-hint">
+              <div className="lacuna-cap">Annotations</div>
+              <div>
+                This Composition predates the reviewer-output addendum
+                (Composition section[1]). Annotations, plan items, and
+                approval state will appear here after the next
+                extract run.
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="lacuna-side">
@@ -342,6 +507,34 @@ function ClauseSpan(props: {
       {clause.isChart && <sup>◆</sup>}
       {clause.text.endsWith(' ') && ' '}
     </span>
+  );
+}
+
+// Annotation card. Defects render with severity colour; context findings
+// render with a neutral border and a small "context" tag. Both surface as
+// annotations. Context findings are permanently-true clinical guardrails
+// (G1, dual-antithrombotic, chart-resolve provenance, plan-risk context)
+// — never counted as noise; the fork panel labels them so the physician
+// can tell one from the other at a glance.
+function Annotation(props: { review: ReviewFinding }): JSX.Element {
+  const { review } = props;
+  const cls =
+    review.kind === 'context'
+      ? 'ctx'
+      : review.severity === 'blocking'
+        ? 'd'
+        : review.severity === 'warning'
+          ? 'w'
+          : 'a';
+  return (
+    <div className={`lacuna-ann ${cls}`}>
+      <h4>
+        {review.reviewer}
+        {review.kind === 'context' && <span className="lacuna-kind-tag">context</span>}
+      </h4>
+      <p>{review.claim}</p>
+      <div className="lacuna-ann-src">↳ {review.referent.source}</div>
+    </div>
   );
 }
 
