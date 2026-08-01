@@ -83,6 +83,17 @@ function extractJsonFromDiv(div: string): string {
     .replace(/&amp;/g, '&');
 }
 
+// Well-known section titles the writer uses. Title-based lookup because
+// A5 added FHIR-native sections (chief complaint, HPI, meds, allergies,
+// plan) with LOINC codes — those live alongside the JSON payloads and
+// can appear at any index.
+const SECTION_TITLE_NOTE = 'IntakeNote (application/json)';
+const SECTION_TITLE_EXTRAS = 'Reviewer output (application/json)';
+
+function findSectionDivByTitle(composition: Composition, title: string): string | undefined {
+  return composition.section?.find((s) => s.title === title)?.text?.div;
+}
+
 const ANTICOAG_RE =
   /anticoag|xa inhibitor|factor xa|doac|warfarin|coumadin|apixaban|eliquis|rivaroxaban|xarelto|dabigatran|pradaxa|edoxaban|savaysa|heparin|enoxaparin|lovenox/i;
 
@@ -147,23 +158,24 @@ export function LacunaPanel(): JSX.Element {
         )) as Composition | undefined;
         if (!composition) throw new Error(`No Composition for Encounter/${encounterId}`);
         setCompositionId(composition.id ?? null);
-        const div = composition.section?.[0]?.text?.div;
-        if (!div) throw new Error('Composition section[0].text.div missing');
-        const parsed = JSON.parse(extractJsonFromDiv(div)) as IntakeNote;
+        // Title-based lookup — A5 added FHIR-native sections in front, so
+        // index [0] is no longer the JSON note.
+        const noteDiv = findSectionDivByTitle(composition, SECTION_TITLE_NOTE);
+        if (!noteDiv) {
+          throw new Error(`Composition has no "${SECTION_TITLE_NOTE}" section`);
+        }
+        const parsed = JSON.parse(extractJsonFromDiv(noteDiv)) as IntakeNote;
         if (cancelled) return;
         setNote(parsed);
 
-        // section[1] — reviewer output addendum. Optional. A Composition
-        // predating A2 has no section[1]; render note-and-transcript only.
-        const div1 = composition.section?.[1]?.text?.div;
-        if (div1) {
+        // Reviewer output section. Optional — a Composition written before
+        // A2 landed has no such section; render note-and-transcript only.
+        const extrasDiv = findSectionDivByTitle(composition, SECTION_TITLE_EXTRAS);
+        if (extrasDiv) {
           try {
-            const parsedExtras = JSON.parse(extractJsonFromDiv(div1)) as CompositionExtras;
+            const parsedExtras = JSON.parse(extractJsonFromDiv(extrasDiv)) as CompositionExtras;
             if (!cancelled) setExtras(parsedExtras);
           } catch {
-            // A malformed addendum is not fatal — leave extras null and
-            // render the primary view. Not reporting to state error so the
-            // panel keeps working.
             if (!cancelled) setExtras(null);
           }
         }
